@@ -57,26 +57,49 @@
     </div>
     <button class="like-btn" id="likeBtn">👍 Like</button>
   </div>
+
   <script>
-    // Views
-    let views = parseInt(localStorage.getItem('simple-page-views') || '0') + 1;
-    localStorage.setItem('simple-page-views', views);
-    document.getElementById('viewCount').innerText = views;
+    const domainKey = 'simple-like-view-page'; // Change if reusing for other pages
 
-    // Likes
-    let liked = localStorage.getItem('simple-page-liked') === '1';
-    let likes = parseInt(localStorage.getItem('simple-page-likes') || '0');
-    document.getElementById('likeCount').innerText = likes;
-    if (liked) document.getElementById('likeBtn').innerText = '💖 Liked';
+    // ======== VIEW COUNT ========
+    fetch('https://visitor.6developer.com/visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: domainKey + '-views' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('viewCount').innerText = data.totalCount;
+    });
 
+    // ======== LIKE COUNT ========
+    const likeKey = 'liked-' + domainKey;
+    const hasLiked = localStorage.getItem(likeKey) === '1';
+
+    // Get current like count
+    fetch(`https://visitor.6developer.com/visit?domain=${domainKey}-likes`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('likeCount').innerText = data.totalCount;
+        if (hasLiked) {
+          document.getElementById('likeBtn').innerText = '💖 Liked';
+        }
+      });
+
+    // Handle like button click
     document.getElementById('likeBtn').addEventListener('click', () => {
-      if (!liked) {
-        liked = true;
-        localStorage.setItem('simple-page-liked', '1');
-        likes++;
-        localStorage.setItem('simple-page-likes', likes);
-        document.getElementById('likeCount').innerText = likes;
-        document.getElementById('likeBtn').innerText = '💖 Liked';
+      if (!hasLiked) {
+        localStorage.setItem(likeKey, '1');
+        fetch('https://visitor.6developer.com/visit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: domainKey + '-likes' })
+        })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('likeCount').innerText = data.totalCount;
+          document.getElementById('likeBtn').innerText = '💖 Liked';
+        });
       }
     });
   </script>

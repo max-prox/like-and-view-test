@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Like & View Page</title>
+  <style>
+    body {
+      background: #000;
+      color: #0ff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 3rem;
+      text-shadow: 0 0 10px #0ff;
+    }
+    .box {
+      margin-top: 2rem;
+      padding: 2rem;
+      border: 2px solid #0ff;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px #0ff;
+    }
+    .stats {
+      margin-top: 1rem;
+      font-size: 1.5rem;
+    }
+    .like-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: 2px solid #0ff;
+      color: #0ff;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .like-btn:hover {
+      background: #0ff;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome!</h1>
+  <div class="box">
+    <div class="stats">
+      👁️ Views: <span id="viewCount">0</span><br />
+      ❤️ Likes: <span id="likeCount">0</span>
+    </div>
+    <button class="like-btn" id="likeBtn">👍 Like</button>
+  </div>
+  <script>
+    // Views
+    let views = parseInt(localStorage.getItem('simple-page-views') || '0') + 1;
+    localStorage.setItem('simple-page-views', views);
+    document.getElementById('viewCount').innerText = views;
+
+    // Likes
+    let liked = localStorage.getItem('simple-page-liked') === '1';
+    let likes = parseInt(localStorage.getItem('simple-page-likes') || '0');
+    document.getElementById('likeCount').innerText = likes;
+    if (liked) document.getElementById('likeBtn').innerText = '💖 Liked';
+
+    document.getElementById('likeBtn').addEventListener('click', () => {
+      if (!liked) {
+        liked = true;
+        localStorage.setItem('simple-page-liked', '1');
+        likes++;
+        localStorage.setItem('simple-page-likes', likes);
+        document.getElementById('likeCount').innerText = likes;
+        document.getElementById('likeBtn').innerText = '💖 Liked';
+      }
+    });
+  </script>
+</body>
+</html>

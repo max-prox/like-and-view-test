@@ -59,49 +59,55 @@
   </div>
 
   <script>
-    const domainKey = 'simple-like-view-page'; // Change if reusing for other pages
+    const viewNamespace = 'my-awesome-site';
+    const viewKey = 'homepage-views';
+    const likeDomainKey = 'simple-like-view-page';
+    const localLikeKey = 'liked-homepage';
 
-    // ======== VIEW COUNT ========
-    fetch('https://visitor.6developer.com/visit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: domainKey + '-views' })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('viewCount').innerText = data.totalCount;
-    });
-
-    // ======== LIKE COUNT ========
-    const likeKey = 'liked-' + domainKey;
-    const hasLiked = localStorage.getItem(likeKey) === '1';
-
-    // Get current like count
-    fetch(`https://visitor.6developer.com/visit?domain=${domainKey}-likes`)
+    // === Fetch Views Once ===
+    fetch(`https://api.countapi.xyz/hit/${viewNamespace}/${viewKey}`)
       .then(res => res.json())
       .then(data => {
-        document.getElementById('likeCount').innerText = data.totalCount;
-        if (hasLiked) {
-          document.getElementById('likeBtn').innerText = '💖 Liked';
-        }
+        document.getElementById('viewCount').innerText = data.value;
       });
 
-    // Handle like button click
-    document.getElementById('likeBtn').addEventListener('click', () => {
+    // === Setup Likes ===
+    const hasLiked = localStorage.getItem(localLikeKey) === '1';
+    const likeBtn = document.getElementById('likeBtn');
+
+    // Show liked status immediately
+    if (hasLiked) {
+      likeBtn.innerText = '💖 Liked';
+    }
+
+    // Like button functionality
+    likeBtn.addEventListener('click', () => {
       if (!hasLiked) {
-        localStorage.setItem(likeKey, '1');
+        localStorage.setItem(localLikeKey, '1');
         fetch('https://visitor.6developer.com/visit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain: domainKey + '-likes' })
+          body: JSON.stringify({ domain: likeDomainKey + '-likes' })
         })
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('likeCount').innerText = data.totalCount;
+            likeBtn.innerText = '💖 Liked';
+          });
+      }
+    });
+
+    // === Realtime Likes Update Every 1 Second ===
+    function updateLikesRealtime() {
+      fetch(`https://visitor.6developer.com/visit?domain=${likeDomainKey}-likes`)
         .then(res => res.json())
         .then(data => {
           document.getElementById('likeCount').innerText = data.totalCount;
-          document.getElementById('likeBtn').innerText = '💖 Liked';
         });
-      }
-    });
+    }
+
+    updateLikesRealtime(); // initial fetch
+    setInterval(updateLikesRealtime, 1000); // update every 1 second
   </script>
 </body>
 </html>
